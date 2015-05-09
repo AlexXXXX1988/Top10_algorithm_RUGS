@@ -66,8 +66,34 @@ table(mailtype,spamtest[,58])
 ##########################################################################
 ## mine tuning the model
 
+
 SVMTune<-function(kernel,kernel.parameter,C){
   filter <- ksvm(type~.,data=spamtrain,kernel=kernel,kpar=kernel.parameter,C=C,cross=3,prob.model=T)
   mailtype <- predict(filter,spamtest[,-58])
-  table(mailtype,spamtest[,58])
+  ConfussionMatrix<-table(mailtype,spamtest[,58])
+  false<-ConfussionMatrix[2:3]
+  false<-c(false,sum(false))
+  false.rate<-false/c(sum(ConfussionMatrix[1:2]),sum(ConfussionMatrix[3:4]),sum(ConfussionMatrix))
+  false.rate<-round(false.rate*100,2)
+  false.rate<-paste(false.rate,"%",sep="")
+  names(false.rate)<-c("nonspam->spam","spam->nonspam","False rate")
+  return(false.rate)
 }
+
+## Gaussian Kernel
+SVMTune("rbfdot",list(sigma=0.0001),5)
+SVMTune("rbfdot",list(sigma=0.001),5)
+SVMTune("rbfdot",list(sigma=0.01),5)
+SVMTune("rbfdot",list(sigma=0.03),5)
+SVMTune("rbfdot",list(sigma=0.05),5)
+SVMTune("rbfdot",list(sigma=0.07),5)
+
+## Polynomial Kernel
+SVMTune("polydot",list(degree=1),5)
+SVMTune("polydot",list(degree=2),5)
+SVMTune("polydot",list(degree=3),5)
+SVMTune("polydot",list(degree=4),5)
+SVMTune("polydot",list(degree=5),5)
+
+
+
